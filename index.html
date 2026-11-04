@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareerPath India — Institutional Advisory Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-warm: #FAF8F5;
+        --card-bg: #FFFFFF;
+        --border-color: #E7E3DC;
+        --text-primary: #1F2421;
+        --text-muted: #6B726C;
+        --accent-burgundy: #881337;
+        --accent-burgundy-hover: #70102E;
+        --accent-gold: #B45309;
+        --badge-bg: #FEF3C7;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        background-color: var(--bg-warm);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .container {
+        width: 100%;
+        max-width: 480px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 36px 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        text-align: center;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--badge-bg);
+        color: var(--accent-gold);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        margin-bottom: 20px;
+      }
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #059669;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+        animation: pulse 2s infinite;
+      }
+      h1 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        letter-spacing: -0.02em;
+      }
+      p.subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 28px;
+      }
+      .status-box {
+        background: var(--bg-warm);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+      }
+      .spinner {
+        width: 22px;
+        height: 22px;
+        border: 3px solid rgba(136, 19, 55, 0.15);
+        border-top-color: var(--accent-burgundy);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex-shrink: 0;
+      }
+      .status-text {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+      .status-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .btn {
+        display: inline-block;
+        width: 100%;
+        background-color: var(--accent-burgundy);
+        color: #FFFFFF;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease;
+      }
+      .btn:hover {
+        background-color: var(--accent-burgundy-hover);
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .footer {
+        margin-top: 24px;
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.02em;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        INSTITUTIONAL ADVISORY GATEWAY
+      </div>
+      <h1>CareerPath India</h1>
+      <p class="subtitle">Direct gateway to your personalized career roadmap, salary benchmarks, and placement guidance.</p>
+
+      <div class="status-box">
+        <div class="spinner" id="loader"></div>
+        <div>
+          <div class="status-text" id="status-title">Locating Active Advisory Node...</div>
+          <div class="status-sub" id="status-desc">Synchronizing gateway endpoint</div>
+        </div>
+      </div>
+
+      <a id="action-btn" class="btn" style="display: none;" href="#">Open Advisory Portal Now →</a>
+
+      <div class="footer">
+        Automated Session Router • Secure 256-bit TLS Gateway
+      </div>
+    </div>
+
+    <script>
+      const GIST_ENDPOINT = "https://api.github.com/gists/70da24334d1e0d30a7c0aec7a20c9918";
+      const statusTitle = document.getElementById("status-title");
+      const statusDesc = document.getElementById("status-desc");
+      const actionBtn = document.getElementById("action-btn");
+      const loader = document.getElementById("loader");
+
+      let attempt = 0;
+
+      async function resolveAndRedirect() {
+        attempt++;
+        try {
+          statusTitle.textContent = "Connecting to Advisory Node...";
+          statusDesc.textContent = "Querying live session endpoint...";
+
+          const response = await fetch(GIST_ENDPOINT + "?_=" + Date.now(), {
+            cache: "no-store",
+            headers: { "Accept": "application/vnd.github.v3+json" }
+          });
+
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+
+          const data = await response.json();
+          const targetUrl = data.files && data.files["url.txt"] ? data.files["url.txt"].content.trim() : null;
+
+          if (targetUrl && targetUrl.startsWith("https://")) {
+            statusTitle.textContent = "Node Connected!";
+            statusDesc.textContent = "Launching advisory interface...";
+            loader.style.borderTopColor = "#059669";
+            
+            actionBtn.href = targetUrl;
+            actionBtn.style.display = "inline-block";
+
+            // Instant automatic redirection
+            setTimeout(() => {
+              window.location.replace(targetUrl);
+            }, 300);
+          } else {
+            throw new Error("Invalid endpoint address");
+          }
+        } catch (err) {
+          console.warn("Gateway sync warning:", err);
+          statusTitle.textContent = "Node Reconnecting...";
+          statusDesc.textContent = "Server is switching network tower. Retrying in 4s (attempt " + attempt + ")...";
+          setTimeout(resolveAndRedirect, 4000);
+        }
+      }
+
+      // Initial execution
+      resolveAndRedirect();
+    </script>
+  </body>
+</html>
