@@ -182,11 +182,27 @@
 
       let attempt = 0;
 
+      async function checkNodeHealth(url) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3000);
+          const res = await fetch(url.replace(/\/+$/, "") + "/health", {
+            method: "GET",
+            mode: "cors",
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+          return res.ok;
+        } catch (e) {
+          return false;
+        }
+      }
+
       async function resolveAndRedirect() {
         attempt++;
         try {
           statusTitle.textContent = "Connecting to Advisory Node...";
-          statusDesc.textContent = "Querying live session endpoint...";
+          statusDesc.textContent = "Querying live session endpoint (attempt " + attempt + ")...";
 
           const response = await fetch(GIST_ENDPOINT + "?_=" + Date.now(), {
             cache: "no-store",
@@ -201,24 +217,38 @@
           const targetUrl = data.files && data.files["url.txt"] ? data.files["url.txt"].content.trim() : null;
 
           if (targetUrl && targetUrl.startsWith("https://")) {
-            statusTitle.textContent = "Node Connected!";
-            statusDesc.textContent = "Launching advisory interface...";
-            loader.style.borderTopColor = "#059669";
-            
-            actionBtn.href = targetUrl;
-            actionBtn.style.display = "inline-block";
+            statusTitle.textContent = "Verifying Node Health...";
+            statusDesc.textContent = "Testing live tunnel handshake...";
 
-            // Instant automatic redirection
-            setTimeout(() => {
-              window.location.replace(targetUrl);
-            }, 300);
+            const isHealthy = await checkNodeHealth(targetUrl);
+
+            if (isHealthy) {
+              statusTitle.textContent = "Node Connected!";
+              statusDesc.textContent = "Launching advisory interface...";
+              loader.style.borderTopColor = "#0284c7";
+              
+              actionBtn.href = targetUrl;
+              actionBtn.style.display = "inline-block";
+
+              // Instant automatic redirection
+              setTimeout(() => {
+                window.location.replace(targetUrl);
+              }, 300);
+              return;
+            } else {
+              // The node is still rebooting or regenerating tunnel
+              statusTitle.textContent = "Advisory Node Booting Up...";
+              statusDesc.textContent = "Puck hardware is starting services and establishing tunnel. Re-checking in 3s...";
+              setTimeout(resolveAndRedirect, 3000);
+              return;
+            }
           } else {
             throw new Error("Invalid endpoint address");
           }
         } catch (err) {
           console.warn("Gateway sync warning:", err);
           statusTitle.textContent = "Node Reconnecting...";
-          statusDesc.textContent = "Server is switching network tower. Retrying in 4s (attempt " + attempt + ")...";
+          statusDesc.textContent = "Waiting for node startup. Retrying in 4s (attempt " + attempt + ")...";
           setTimeout(resolveAndRedirect, 4000);
         }
       }
